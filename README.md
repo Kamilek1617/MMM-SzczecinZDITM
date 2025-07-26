@@ -1,11 +1,11 @@
-# MMM-SzczecinZDITM (No CORS)
+# MMM-SzczecinZDITM (Displays API)
 
-MagicMirror module to display real-time departure information for Szczecin public transport via ZDiTM Szczecin API (manual stop config only).
+MagicMirror module to display real-time departure info from Szczecin ZDiTM using departure boards endpoint.
 
 ## Installation
 ```bash
 cd ~/MagicMirror/modules
-unzip MMM-SzczecinZDITM_nocors.zip
+unzip MMM-SzczecinZDITM_displays.zip
 cd MMM-SzczecinZDITM
 npm install
 ```
@@ -21,14 +21,12 @@ In `config/config.js`:
     maxDepartures: 5,
     updateInterval: 60000,
     stops: [
-      { id: 50,  name: 'Plac Żołnierza Polskiego', line: 3 },
-      { id: 120, name: 'Plac Grunwaldzki' }
+      { number: '11312', name: 'Plac Żołnierza Polskiego', line: 3 }
     ]
   }
 }
 ```
 
 ## Notes
-- Uses only `/api/v1/departures`
-- No `/stops` request (manual configuration only)
-- Safe for use without CORS errors
+- Uses `https://www.zditm.szczecin.pl/api/v1/displays/{stopNumber}`
+- Filters by `line` if provided

@@ -1,16 +1,14 @@
 /*
 MagicMirror Module: MMM-SzczecinZDITM
-Displays real-time departure information for multiple Szczecin stops using ZDiTM Szczecin API.
-
-Author: Final no-CORS version
+Displays real-time departure info from ZDiTM Szczecin using departure boards API.
 */
 
 Module.register("MMM-SzczecinZDITM", {
     defaults: {
-        updateInterval: 30000,
+        updateInterval: 60000,
         maxDepartures: 5,
-        stops: [], // Manual stops only
-        apiBase: "https://www.zditm.szczecin.pl/api/v1/departures"
+        stops: [],
+        apiBase: "https://www.zditm.szczecin.pl/api/v1/displays/"
     },
 
     getStyles: function () {
@@ -26,15 +24,15 @@ Module.register("MMM-SzczecinZDITM", {
     fetchDepartures: function () {
         var self = this;
         this.config.stops.forEach(stop => {
-            var url = `${this.config.apiBase}?stopId=${stop.id}`;
+            const url = `${this.config.apiBase}${stop.number}`;
             fetch(url)
                 .then(res => res.json())
                 .then(data => {
-                    var list = data;
+                    let departures = data.departures || [];
                     if (stop.line) {
-                        list = list.filter(d => d.line == stop.line.toString());
+                        departures = departures.filter(d => d.line_number == stop.line.toString());
                     }
-                    self.departures[stop.id] = list.slice(0, self.config.maxDepartures);
+                    self.departures[stop.number] = departures.slice(0, self.config.maxDepartures);
                     self.updateDom();
                 })
                 .catch(err => console.error("[MMM-SzczecinZDITM] Error fetching departures:", err));
@@ -65,7 +63,7 @@ Module.register("MMM-SzczecinZDITM", {
             header.innerHTML = `<div class="mpk__header">${stop.name}${lineInfo}</div>`;
             section.appendChild(header);
 
-            var deps = this.departures[stop.id] || [];
+            var deps = this.departures[stop.number] || [];
             if (deps.length === 0) {
                 var empty = document.createElement("div");
                 empty.className = "mpk__no-deps";
@@ -75,7 +73,10 @@ Module.register("MMM-SzczecinZDITM", {
                 deps.forEach(dep => {
                     var item = document.createElement("div");
                     item.className = "mpk__item";
-                    item.innerHTML = `<span class="mpk__line-number">${dep.line}</span> ${dep.departureTime}`;
+                    const when = dep.time_real
+                        ? `${dep.time_real} min`
+                        : (dep.time_scheduled || "brak danych");
+                    item.innerHTML = `<span class="mpk__line-number">${dep.line_number}</span> ${dep.direction} – ${when}`;
                     section.appendChild(item);
                 });
             }
