@@ -2,7 +2,7 @@
 MagicMirror Module: MMM-SzczecinZDITM
 Displays real-time departure information for Szczecin public transport using ZDiTM Szczecin API.
 
-Author: Adapted from MMM-CracowMPK 
+Author: Adapted from MMM-CracowMPK and MMM-SzczecinMPK
 */
 
 Module.register("MMM-SzczecinZDITM", {
@@ -10,9 +10,14 @@ Module.register("MMM-SzczecinZDITM", {
         updateInterval: 30 * 1000, // 30 seconds
         maxDepartures: 5,
         stopId: null,          // Numeric ID of the stop
-        apiKey: "",          // If required by the API
+        apiKey: "",
         apiBase: "https://www.zditm.szczecin.pl/pl/zditm/dla-programistow/api-tablice-odjazdow",
         stopsApi: "https://www.zditm.szczecin.pl/pl/zditm/dla-programistow/api-przystanki"
+    },
+
+    // Load CSS
+    getStyles: function() {
+        return [this.name + ".css"];
     },
 
     start: function() {
@@ -51,6 +56,8 @@ Module.register("MMM-SzczecinZDITM", {
 
     getDom: function() {
         var wrapper = document.createElement("div");
+        wrapper.className = "mpk";
+
         if (!this.loaded) {
             wrapper.innerHTML = "Ładowanie danych...";
             return wrapper;
@@ -59,18 +66,18 @@ Module.register("MMM-SzczecinZDITM", {
             wrapper.innerHTML = "Brak odjazdów";
             return wrapper;
         }
-        var table = document.createElement("table");
+
+        var header = document.createElement("div");
+        header.className = "mpk__header-wrapper";
+        header.innerHTML = `<div class=\"mpk__header\">Przystanek: ${this.config.stopId}</div>`;
+        wrapper.appendChild(header);
+
         this.departures.forEach(dep => {
-            var row = document.createElement("tr");
-            var route = document.createElement("td");
-            var time = document.createElement("td");
-            route.innerHTML = dep.line;
-            time.innerHTML = dep.departureTime;
-            row.appendChild(route);
-            row.appendChild(time);
-            table.appendChild(row);
+            var item = document.createElement("div");
+            item.className = "mpk__item";
+            item.innerHTML = `<span class=\"mpk__line-number\">${dep.line}</span> ${dep.departureTime}`;
+            wrapper.appendChild(item);
         });
-        wrapper.appendChild(table);
         return wrapper;
     },
 

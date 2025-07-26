@@ -1,9 +1,9 @@
 {
   "name": "MMM-SzczecinZDITM",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MagicMirror module for Szczecin ZDiTM departures",
   "main": "MMM-SzczecinZDITM.js",
-  "author": "PanGalaretka",
+  "author": "Adapted",
   "license": "MIT",
   "dependencies": {}
 }
