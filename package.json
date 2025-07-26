@@ -1,9 +1,9 @@
 {
   "name": "MMM-SzczecinZDITM",
-  "version": "1.1.0",
-  "description": "MagicMirror module for Szczecin ZDiTM departures with filter by line",
+  "version": "1.2.1",
+  "description": "MagicMirror module for Szczecin ZDiTM departures (no-CORS, manual stops only)",
   "main": "MMM-SzczecinZDITM.js",
-  "author": "Adapted",
+  "author": "Final Fixed",
   "license": "MIT",
   "dependencies": {}
 }

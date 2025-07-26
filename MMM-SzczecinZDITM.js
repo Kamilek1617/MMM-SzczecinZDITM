@@ -1,103 +1,95 @@
 /*
 MagicMirror Module: MMM-SzczecinZDITM
-Displays real-time departure information for Szczecin public transport using ZDiTM Szczecin API.
+Displays real-time departure information for multiple Szczecin stops using ZDiTM Szczecin API.
 
-Author: Adapted from MMM-CracowMPK and MMM-SzczecinMPK
+Author: Final no-CORS version
 */
 
 Module.register("MMM-SzczecinZDITM", {
     defaults: {
-        updateInterval: 30 * 1000, // 30 seconds
+        updateInterval: 30000,
         maxDepartures: 5,
-        stopId: null,            // Numeric ID of the stop
-        stopName: "",            // Optional display name
-        lineNumber: null,        // Specific line to filter
-        apiKey: "",
-        apiBase: "https://www.zditm.szczecin.pl/api/v1/departures",
-        stopsApi: "https://www.zditm.szczecin.pl/api/v1/stops"
+        stops: [], // Manual stops only
+        apiBase: "https://www.zditm.szczecin.pl/api/v1/departures"
     },
 
-    getStyles: function() {
+    getStyles: function () {
         return [this.name + ".css"];
     },
 
-    start: function() {
-        this.loaded = false;
-        this.departures = [];
-        this.fetchStops();
+    start: function () {
+        this.loaded = true;
+        this.departures = {};
         this.scheduleUpdate(0);
     },
 
-    fetchStops: function() {
+    fetchDepartures: function () {
         var self = this;
-        fetch(this.config.stopsApi)
-            .then(response => response.json())
-            .then(data => {
-                if (!self.config.stopId && data.length) {
-                    self.config.stopId = data[0].id;
-                    self.config.stopName = data[0].name;
-                } else if (!self.config.stopName) {
-                    var found = data.find(s => s.id === self.config.stopId);
-                    if (found) self.config.stopName = found.name;
-                }
-                self.loaded = true;
-                self.updateDom();
-            })
-            .catch(error => console.error("[MMM-SzczecinZDITM] Error fetching stops:", error));
+        this.config.stops.forEach(stop => {
+            var url = `${this.config.apiBase}?stopId=${stop.id}`;
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    var list = data;
+                    if (stop.line) {
+                        list = list.filter(d => d.line == stop.line.toString());
+                    }
+                    self.departures[stop.id] = list.slice(0, self.config.maxDepartures);
+                    self.updateDom();
+                })
+                .catch(err => console.error("[MMM-SzczecinZDITM] Error fetching departures:", err));
+        });
     },
 
-    fetchDepartures: function() {
-        var self = this;
-        if (!this.config.stopId) return;
-        var url = `${this.config.apiBase}?stopId=${this.config.stopId}`;
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                // filter by lineNumber if set
-                var list = data;
-                if (self.config.lineNumber) {
-                    list = list.filter(d => d.line == self.config.lineNumber.toString());
-                }
-                self.departures = list.slice(0, self.config.maxDepartures);
-                self.updateDom();
-            })
-            .catch(error => console.error("[MMM-SzczecinZDITM] Error fetching departures:", error));
-    },
-
-    getDom: function() {
+    getDom: function () {
         var wrapper = document.createElement("div");
-        wrapper.className = "mpk";
+        wrapper.className = "mpk-multi";
 
         if (!this.loaded) {
             wrapper.innerHTML = "Ładowanie danych...";
             return wrapper;
         }
-        if (this.departures.length === 0) {
-            wrapper.innerHTML = "Brak odjazdów";
+
+        if (!this.config.stops.length) {
+            wrapper.innerHTML = "Brak skonfigurowanych przystanków";
             return wrapper;
         }
 
-        var header = document.createElement("div");
-        header.className = "mpk__header-wrapper";
-        var title = this.config.stopName || this.config.stopId;
-        var lineInfo = this.config.lineNumber ? `, linia ${this.config.lineNumber}` : "";
-        header.innerHTML = `<div class="mpk__header">Przystanek: ${title}${lineInfo}</div>`;
-        wrapper.appendChild(header);
+        this.config.stops.forEach(stop => {
+            var section = document.createElement("div");
+            section.className = "mpk__section";
 
-        this.departures.forEach(dep => {
-            var item = document.createElement("div");
-            item.className = "mpk__item";
-            item.innerHTML = `<span class="mpk__line-number">${dep.line}</span> ${dep.departureTime}`;
-            wrapper.appendChild(item);
+            var header = document.createElement("div");
+            header.className = "mpk__header-wrapper";
+            var lineInfo = stop.line ? `, linia ${stop.line}` : "";
+            header.innerHTML = `<div class="mpk__header">${stop.name}${lineInfo}</div>`;
+            section.appendChild(header);
+
+            var deps = this.departures[stop.id] || [];
+            if (deps.length === 0) {
+                var empty = document.createElement("div");
+                empty.className = "mpk__no-deps";
+                empty.innerHTML = "Brak odjazdów";
+                section.appendChild(empty);
+            } else {
+                deps.forEach(dep => {
+                    var item = document.createElement("div");
+                    item.className = "mpk__item";
+                    item.innerHTML = `<span class="mpk__line-number">${dep.line}</span> ${dep.departureTime}`;
+                    section.appendChild(item);
+                });
+            }
+            wrapper.appendChild(section);
         });
+
         return wrapper;
     },
 
-    scheduleUpdate: function(delay) {
-        var nextLoad = typeof delay === "number" && delay >= 0 ? delay : this.config.updateInterval;
+    scheduleUpdate: function (delay) {
+        var next = typeof delay === "number" && delay >= 0 ? delay : this.config.updateInterval;
         setTimeout(() => {
             this.fetchDepartures();
             this.scheduleUpdate();
-        }, nextLoad);
+        }, next);
     }
 });
