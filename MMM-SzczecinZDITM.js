@@ -13,8 +13,8 @@ Module.register("MMM-SzczecinZDITM", {
         stopName: "",            // Optional display name
         lineNumber: null,        // Specific line to filter
         apiKey: "",
-        apiBase: "https://www.zditm.szczecin.pl/pl/zditm/dla-programistow/api-tablice-odjazdow",
-        stopsApi: "https://www.zditm.szczecin.pl/pl/zditm/dla-programistow/api-przystanki"
+        apiBase: "https://www.zditm.szczecin.pl/api/v1/departures",
+        stopsApi: "https://www.zditm.szczecin.pl/api/v1/stops"
     },
 
     getStyles: function() {
