@@ -9,13 +9,14 @@ Module.register("MMM-SzczecinZDITM", {
     defaults: {
         updateInterval: 30 * 1000, // 30 seconds
         maxDepartures: 5,
-        stopId: null,          // Numeric ID of the stop
+        stopId: null,            // Numeric ID of the stop
+        stopName: "",            // Optional display name
+        lineNumber: null,        // Specific line to filter
         apiKey: "",
         apiBase: "https://www.zditm.szczecin.pl/pl/zditm/dla-programistow/api-tablice-odjazdow",
         stopsApi: "https://www.zditm.szczecin.pl/pl/zditm/dla-programistow/api-przystanki"
     },
 
-    // Load CSS
     getStyles: function() {
         return [this.name + ".css"];
     },
@@ -34,6 +35,10 @@ Module.register("MMM-SzczecinZDITM", {
             .then(data => {
                 if (!self.config.stopId && data.length) {
                     self.config.stopId = data[0].id;
+                    self.config.stopName = data[0].name;
+                } else if (!self.config.stopName) {
+                    var found = data.find(s => s.id === self.config.stopId);
+                    if (found) self.config.stopName = found.name;
                 }
                 self.loaded = true;
                 self.updateDom();
@@ -48,7 +53,12 @@ Module.register("MMM-SzczecinZDITM", {
         fetch(url)
             .then(response => response.json())
             .then(data => {
-                self.departures = data.slice(0, this.config.maxDepartures);
+                // filter by lineNumber if set
+                var list = data;
+                if (self.config.lineNumber) {
+                    list = list.filter(d => d.line == self.config.lineNumber.toString());
+                }
+                self.departures = list.slice(0, self.config.maxDepartures);
                 self.updateDom();
             })
             .catch(error => console.error("[MMM-SzczecinZDITM] Error fetching departures:", error));
@@ -69,13 +79,15 @@ Module.register("MMM-SzczecinZDITM", {
 
         var header = document.createElement("div");
         header.className = "mpk__header-wrapper";
-        header.innerHTML = `<div class=\"mpk__header\">Przystanek: ${this.config.stopId}</div>`;
+        var title = this.config.stopName || this.config.stopId;
+        var lineInfo = this.config.lineNumber ? `, linia ${this.config.lineNumber}` : "";
+        header.innerHTML = `<div class="mpk__header">Przystanek: ${title}${lineInfo}</div>`;
         wrapper.appendChild(header);
 
         this.departures.forEach(dep => {
             var item = document.createElement("div");
             item.className = "mpk__item";
-            item.innerHTML = `<span class=\"mpk__line-number\">${dep.line}</span> ${dep.departureTime}`;
+            item.innerHTML = `<span class="mpk__line-number">${dep.line}</span> ${dep.departureTime}`;
             wrapper.appendChild(item);
         });
         return wrapper;

@@ -1,6 +1,6 @@
 # MMM-SzczecinZDITM
 
-MagicMirror module to display real-time departure information for Szczecin public transport via ZDiTM Szczecin API, with styling.
+MagicMirror module to display real-time departure information for Szczecin public transport via ZDiTM Szczecin API, with styling and line filter.
 
 ## Installation
 1. Clone into `modules/`:
@@ -14,9 +14,15 @@ MagicMirror module to display real-time departure information for Szczecin publi
 {
   module: 'MMM-SzczecinZDITM',
   position: 'top_left',
-  config: { stopId: 123, maxDepartures: 5, updateInterval: 60000 }
+  config: {
+    stopId: 50,            // 11312 numer przystanku
+    stopName: "Plac Żołnierza Polskiego",
+    lineNumber: 3,         // filtr linii
+    maxDepartures: 5,
+    updateInterval: 60000
+  }
 }
 ```
 
 ## Usage
-Wyświetla odjazdy z przystanku i stosuje styl definiowany w `MMM-SzczecinZDITM.css`.
+Wyświetla odjazdy z określonego przystanku i linii, używając stylu z `MMM-SzczecinZDITM.css`.
