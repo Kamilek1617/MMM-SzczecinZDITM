@@ -72,6 +72,11 @@ Module.register("MMM-SzczecinZDITM", {
             return wrapper;
         }
 
+        var directionHeader = document.createElement("div");
+        directionHeader.className = "mpk__header-wrapper";
+        directionHeader.innerHTML = `<div class="mpk__header">Kierunek: ${this.departures[0].direction}</div>`;
+        wrapper.appendChild(directionHeader);
+
         this.departures.forEach(dep => {
             var item = document.createElement("div");
             item.className = "mpk__item";
@@ -79,9 +84,7 @@ Module.register("MMM-SzczecinZDITM", {
                 ? `${dep.time_real} min`
                 : (dep.time_scheduled || "brak danych");
             const line = dep.line_number;
-            const icon = /^[1-9]$|^1[0-8]$/.test(line) ? "🚋" : "🚌";
-            item.innerHTML = `<span class="mpk__line-number">${line}</span> ${icon} ${dep.direction} (${dep.stopName}) – ${when}`;
-            item.classList.add(icon === "🚋" ? "tram" : "bus");
+            item.innerHTML = `<span class="mpk__line-number line-${line}">${line}</span> z ${dep.stopName} – ${when}`;
             wrapper.appendChild(item);
         });
 
