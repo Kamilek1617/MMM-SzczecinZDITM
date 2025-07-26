@@ -1,7 +1,42 @@
-.mpk-multi { padding: 5px; }
-.mpk__section { margin-bottom: 20px; }
-.mpk__header-wrapper { margin-bottom: 5px; }
-.mpk__header { font-size: 22px; color: #fff; border-bottom: 2px solid #555; padding-bottom: 3px; }
-.mpk__item { font-size: 18px; color: #fff; margin: 3px 0; }
-.mpk__line-number { display: inline-block; width: 30px; text-align: center; border: 1px solid #555; border-radius: 50%; margin-right: 8px; }
-.mpk__no-deps { font-style: italic; color: #888; }
+.mpk-multi {
+  font-family: sans-serif;
+}
+
+.mpk__header-wrapper {
+  margin-bottom: 10px;
+}
+
+.mpk__header {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.mpk__item {
+  margin: 4px 0;
+}
+
+.mpk__line-number {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  text-align: center;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+/* Kolory dla wybranych linii – dopisuj więcej jak potrzeba */
+.line-1 { background-color: #e53935; }
+.line-3 { background-color: #43a047; }
+.line-5 { background-color: #1e88e5; }
+.line-7 { background-color: #f4511e; }
+.line-8 { background-color: #6d4c41; }
+.line-10 { background-color: #8e24aa; }
+.line-12 { background-color: #3949ab; }
+.line-14 { background-color: #00897b; }
+.line-16 { background-color: #d81b60; }
+.line-18 { background-color: #00acc1; }
+/* Fallback kolor */
+[class^="line-"]:not([class*="line-"]) { background-color: #757575; }
